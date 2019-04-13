@@ -3,8 +3,10 @@ package pexels
 //go:generate mockgen --destination=../mocks/mock_getter.go --package mocks github.com/martinomburajr/gopexels/pexels Getter
 
 import (
-	"github.com/martinomburajr/gogist/gists"
+	"encoding/json"
+	"github.com/martinomburajr/pexels/auth"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -22,7 +24,9 @@ const (
 	URLCurated         = "curated"
 )
 
+//ImageSizes represents a set of image sizes that pexels uses
 var ImageSizes = []string{ImageSizeOriginal, ImageSizeLarge, ImageSizeLarge2x, ImageSizeMedium, ImageSizeSmall, ImageSizePortrait, ImageSizeLandscape, ImageSizeTiny}
+
 // Getter belongs to any types that must retrieve an item based on an id.
 type Getter interface {
 	// Given an id or resource locator, Get implements the functionality of retrieving an item id doesnt necessarily need to be a standardized id e.g. for a database record,
@@ -46,6 +50,7 @@ type PexelImageResponse struct {
 
 //PexelPhoto represents the information of photo
 type PexelPhoto struct {
+	ID           int           `json:"id,omitempty"`
 	Width        int              `json:"width,omitempty"`
 	Height       int              `json:"height,omitempty"`
 	URL          string           `json:"url,omitempty"`
@@ -67,8 +72,21 @@ type PexelPhotoSource struct {
 
 // PexelPhoto implementation of Getter that retrieves a random image based on its size.
 func (pi *PexelPhoto) Get(id string) ([]byte, error) {
-	urll := gists.EndpointBase+"id"
-	return parseRequest(urll)
+	urll := BaseURL + "photos/" + id
+	data, err := parseRequest(urll)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Print(string(data))
+
+	err = json.Unmarshal(data, pi)
+	if err != nil {
+		return nil, err
+	}
+
+	data2, err := parseRequest(pi.Source.Large)
+	return data2, nil
 }
 
 // PexelPhoto implementation of Getter that retrieves a random image based on its size.
@@ -95,10 +113,14 @@ func parseRequest(urlWSize string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	request.Header.Add(http.CanonicalHeaderKey("Authorization"), auth.PexelSession.API_KEY)
+
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return nil, err
 	}
+
 	defer response.Body.Close()
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -106,7 +128,6 @@ func parseRequest(urlWSize string) ([]byte, error) {
 	}
 	return data, nil
 }
-
 
 //func(pi *PexelPhoto) GetRandomImage(kind string) error {
 //	randomInt := generateRandomInteger(1000)

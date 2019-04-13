@@ -60,7 +60,6 @@ func Test_parseRequest(t *testing.T) {
 
 	handler.ServeHTTP(recorder, request)
 
-
 	//type args struct {
 	//	urlWSize string
 	//}
@@ -95,9 +94,9 @@ func Test_parseSize(t *testing.T) {
 		args args
 		want string
 	}{
-		{name: "should return large", args:args{size:"hello"}, want:ImageSizeLarge },
-		{name: "should return medium", args:args{size:ImageSizeMedium}, want:ImageSizeMedium },
-		{name: "should return portrait", args:args{size:"PoRtRaiT"}, want:ImageSizePortrait },
+		{name: "should return large", args: args{size: "hello"}, want: ImageSizeLarge},
+		{name: "should return medium", args: args{size: ImageSizeMedium}, want: ImageSizeMedium},
+		{name: "should return portrait", args: args{size: "PoRtRaiT"}, want: ImageSizePortrait},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
