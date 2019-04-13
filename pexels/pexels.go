@@ -85,7 +85,7 @@ func (pi *PexelPhoto) Get(id string) ([]byte, error) {
 		return nil, err
 	}
 
-	data2, err := parseRequest(pi.Source.Large)
+	data2, err := parseRequest(pi.Source.Original)
 	return data2, nil
 }
 

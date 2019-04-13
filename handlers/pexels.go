@@ -33,6 +33,8 @@ func GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 		"Directory: %s\n" +
 		"Size: %d bytes", id+".jpg", msg, len(data))
 
+	utils.ChangeUbuntuBackground(msg)
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(resp))
 }
