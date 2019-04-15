@@ -4,10 +4,8 @@ package pexels
 
 import (
 	"encoding/json"
-	"github.com/martinomburajr/pexels/auth"
-	"io/ioutil"
-	"log"
-	"net/http"
+	"fmt"
+	"github.com/martinomburajr/pexels/utils"
 	"strings"
 )
 
@@ -73,29 +71,27 @@ type PexelPhotoSource struct {
 // PexelPhoto implementation of Getter that retrieves a random image based on its size.
 func (pi *PexelPhoto) Get(id string) ([]byte, error) {
 	urll := BaseURL + "photos/" + id
-	data, err := parseRequest(urll)
+	data, err := utils.ParseRequest(urll)
 	if err != nil {
 		return nil, err
 	}
-
-	log.Print(string(data))
 
 	err = json.Unmarshal(data, pi)
 	if err != nil {
 		return nil, err
 	}
 
-	data2, err := parseRequest(pi.Source.Original)
+	data2, err := utils.ParseRequest(pi.Source.Original)
 	return data2, nil
 }
 
 // PexelPhoto implementation of Getter that retrieves a random image based on its size.
 func (pi *PexelPhoto) GetBySize(size string) ([]byte, error) {
 	s := parseSize(size)
-	return parseRequest(s)
+	return utils.ParseRequest(s)
 }
 
-//obtains the size arg and if it is empty returns the ImageSizeLarge
+//parseSize obtains the size arg and if it is empty returns the ImageSizeLarge
 func parseSize(size string) string {
 	lower := strings.ToLower(size)
 	for _, v := range ImageSizes {
@@ -107,52 +103,24 @@ func parseSize(size string) string {
 	return size
 }
 
-//parseRequest parses the request for a picture
-func parseRequest(urlWSize string) ([]byte, error) {
-	request, err := http.NewRequest(http.MethodGet, urlWSize, nil)
+//GetRandomImage returns a random image from the Pexel API
+func(pi *PexelPhoto) GetRandomImage() ([]byte, error) {
+	randomInt := utils.RandIntBetween(1000)
+	urll := fmt.Sprintf("%s%s?per_page=%d&page=%d", BaseURL, URLCurated, 1, randomInt)
+
+	data, err := utils.ParseRequest(urll)
 	if err != nil {
 		return nil, err
 	}
 
-	request.Header.Add(http.CanonicalHeaderKey("Authorization"), auth.PexelSession.API_KEY)
-
-	response, err := http.DefaultClient.Do(request)
+	var pr PexelImageResponse
+	err = json.Unmarshal(data, &pr)
 	if err != nil {
 		return nil, err
 	}
 
-	defer response.Body.Close()
-	data, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
+	*pi = pr.Photos[0]
+
+	data2, err := utils.ParseRequest(pi.Source.Original)
+	return data2, nil
 }
-
-//func(pi *PexelPhoto) GetRandomImage(kind string) error {
-//	randomInt := generateRandomInteger(1000)
-//	urll := fmt.Sprintf("%s/%s?per_page=%d&page=%d", BaseURL, URLCurated, 1, randomInt)
-//	req, err := http.NewRequest(http.MethodGet, urll, nil)
-//	if err != nil {
-//		return err
-//	}
-//}
-
-//Returns an image
-//func GetRandomImageWQuery() {
-//
-//}
-//
-//
-//
-//
-//func generateRandomInteger(max int) int {
-//	return rand.Intn(max-1) + 1
-//}
-//
-//
-//
-//
-//func (pi PexelPhoto) findAppropriateSize() {
-//
-//}

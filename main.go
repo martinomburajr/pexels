@@ -36,7 +36,6 @@ func init() {
 				"You receive a maximum of 20,000 calls per month. That's a good amount of calls ;-)"
 			log.Fatalf("\n\n%s\n\n%s", msg, err.Error())
 		}
-		auth.PexelSession.API_KEY = ap
 		log.Print("API KEY Found! :D")
 		return
 	}
@@ -47,8 +46,9 @@ func init() {
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", nil)
-	r.HandleFunc("/new/{id}", handlers.GetPexelHandler)
+	r.HandleFunc("/", nil).Methods(http.MethodGet)
+	r.HandleFunc("/new/{id}", handlers.GetPexelHandler).Methods(http.MethodGet)
+	r.HandleFunc("/rand", handlers.GetRandomHandler).Methods(http.MethodGet)
 
 	log.Print(fmt.Sprintf("pexels server started on port %d", port))
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), r))
