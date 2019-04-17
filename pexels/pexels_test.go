@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-var pps1 PexelPhotoSource = PexelPhotoSource{"orig1", "large1", "large2x1", "medium1", "small1", "portrait1", "landscape1", "tiny1"}
-var pps2 PexelPhotoSource = PexelPhotoSource{"orig2", "large2", "large2x2", "medium2", "small2", "portrait2", "landscape2", "tiny2"}
+var pps1 PexelPhotoSource = PexelPhotoSource{"original1", "large1", "large2x1", "medium1", "small1", "portrait1", "landscape1", "tiny1"}
+var pps2 PexelPhotoSource = PexelPhotoSource{"original2", "large2", "large2x2", "medium2", "small2", "portrait2", "landscape2", "tiny2"}
 
 //
 var pp1 PexelPhoto = PexelPhoto{14343, 1080, 1920, "https://pexels/some/fake/url", "martin", pps1}
@@ -19,9 +19,14 @@ func TestPexelPhoto_GetBySize(t *testing.T) {
 		want   string
 	}{
 		{"empty string as size value", pp1, "", "large1"},
+		{"random unrelated text", pp1, "asbngaojubgao;ga", "large1"},
 		{"normal string: small", pp1, "small", "small1"},
 		{"normal string: landscape", pp1, "landscape", "landscape1"},
 		{"normal string: large2x", pp2, "laRge2x", "large2x2"},
+		{"normal string: medium", pp2, "medium", "medium2"},
+		{"normal string: tiny", pp2, "tiny", "tiny2"},
+		{"normal string: large", pp2, "large", "large2"},
+		{"mixed case string: original", pp2, "origINAL", "original2"},
 		{"misspelled string: large2x", pp2, "laRg2x", "large2"},
 	}
 	for _, tt := range tests {

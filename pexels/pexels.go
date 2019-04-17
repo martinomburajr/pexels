@@ -142,7 +142,6 @@ func (pi *PexelPhoto) GetBySize(size string) string {
 	default:
 		return pi.Source.Large
 	}
-	return pi.Source.Large
 }
 
 //parseSize obtains the size arg and if it is empty returns the ImageSizeLarge
