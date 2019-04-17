@@ -79,7 +79,7 @@ type PexelPhotoSource struct {
 	Tiny      string `json:"tiny,omitempty"`
 }
 
-// PexelPhoto implementation of Getter that retrieves a random image based on its size.
+// PexelPhoto implementation of Getter that retrieves an image based on its size.
 func (pi *PexelPhoto) Get(id, size string) ([]byte, error) {
 	urll := BaseURL + "photos/" + id
 	data, err := utils.ParseRequest(urll)
