@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"github.com/martinomburajr/pexels/auth"
 	"io/ioutil"
+	"math/rand"
+	"net/http"
 	"os"
 	"os/exec"
 )
@@ -34,3 +37,33 @@ func ChangeUbuntuBackground(filepath string) error {
 
 	return nil
 }
+
+
+func RandIntBetween(max int) int {
+	return rand.Intn(max-1) + 1
+}
+
+//ParseRequest parses the request for a picture
+func ParseRequest(url string) ([]byte, error) {
+	request, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	request.Header.Add(http.CanonicalHeaderKey("Authorization"), auth.PexelSession.API_KEY)
+
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	defer response.Body.Close()
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+
+

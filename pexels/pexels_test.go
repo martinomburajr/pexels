@@ -73,13 +73,13 @@ func Test_parseRequest(t *testing.T) {
 	//}
 	//for _, tt := range tests {
 	//	t.Run(tt.name, func(t *testing.T) {
-	//		got, err := parseRequest(tt.args.urlWSize)
+	//		got, err := ParseRequest(tt.args.urlWSize)
 	//		if (err != nil) != tt.wantErr {
-	//			t.Errorf("parseRequest() error = %v, wantErr %v", err, tt.wantErr)
+	//			t.Errorf("ParseRequest() error = %v, wantErr %v", err, tt.wantErr)
 	//			return
 	//		}
 	//		if !reflect.DeepEqual(got, tt.want) {
-	//			t.Errorf("parseRequest() = %v, want %v", got, tt.want)
+	//			t.Errorf("ParseRequest() = %v, want %v", got, tt.want)
 	//		}
 	//	})
 	//}
