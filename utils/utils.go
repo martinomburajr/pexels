@@ -38,21 +38,14 @@ func ChangeUbuntuBackground(filepath string) error {
 	return nil
 }
 
-//Returns an image
-//func GetRandomImageWQuery() {
-//
-//}
-//
-//
-//
-//
+
 func RandIntBetween(max int) int {
 	return rand.Intn(max-1) + 1
 }
 
 //ParseRequest parses the request for a picture
-func ParseRequest(urlWSize string) ([]byte, error) {
-	request, err := http.NewRequest(http.MethodGet, urlWSize, nil)
+func ParseRequest(url string) ([]byte, error) {
+	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -17,7 +17,9 @@ func GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	data, err := pexel.Get(id)
+	imgSize := r.URL.Query().Get("size")
+
+	data, err := pexel.Get(id, imgSize)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -33,7 +35,7 @@ func GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 	resp := fmt.Sprintf(
 		"Filename: %s\n" +
 			"Directory: %s\n" +
-			"Size: %d bytes", fmt.Sprintf("%d.jpg", pexel.ID), filepath, len(data))
+			"Size: %d bytes", fmt.Sprintf("%d.jpg\n", pexel.ID), filepath, len(data))
 
 	utils.ChangeUbuntuBackground(filepath)
 	if err != nil {
@@ -47,7 +49,9 @@ func GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 func GetRandomHandler(w http.ResponseWriter, r *http.Request) {
 	pexel := pexels.PexelPhoto{}
 
-	data, err := pexel.GetRandomImage()
+	imgSize := r.URL.Query().Get("size")
+
+	data, err := pexel.GetRandomImage(imgSize)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

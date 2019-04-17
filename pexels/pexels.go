@@ -10,15 +10,26 @@ import (
 )
 
 const (
+	//@todo get exact description of sizes
+	//ImageSizeOriginal represents the original size. Typically the largest with the best quality
 	ImageSizeOriginal  = "original"
+	//ImageSizeLarge is a large photo
 	ImageSizeLarge     = "large"
+	//ImageSizeLarge2x double the resolution of the largest
 	ImageSizeLarge2x   = "large2x"
+	//ImageSizeMedium medium photo
 	ImageSizeMedium    = "medium"
+	//ImageSizeSmall small photo (lacks in resolution)
 	ImageSizeSmall     = "small"
+	//ImageSizePortrait portrait mode. This image is usually cropped to fit that size
 	ImageSizePortrait  = "portrait"
+	//ImageSizeLandscape landscape sized photo
 	ImageSizeLandscape = "landscape"
+	//ImageSizeLandscape tiny photo
 	ImageSizeTiny      = "tiny"
+	//BaseURL is the base URL to the API
 	BaseURL            = "https://api.pexels.com/v1/"
+	//URLCurated is a path to the curated section within pexels. According to pexels ... We add at least one new photo per hour to our curated list so that you get a changing selection of trending photos. For more information about the request parameters and response structure have a look at the search method above.
 	URLCurated         = "curated"
 )
 
@@ -48,7 +59,7 @@ type PexelImageResponse struct {
 
 //PexelPhoto represents the information of photo
 type PexelPhoto struct {
-	ID           int           `json:"id,omitempty"`
+	ID           int              `json:"id,omitempty"`
 	Width        int              `json:"width,omitempty"`
 	Height       int              `json:"height,omitempty"`
 	URL          string           `json:"url,omitempty"`
@@ -69,7 +80,7 @@ type PexelPhotoSource struct {
 }
 
 // PexelPhoto implementation of Getter that retrieves a random image based on its size.
-func (pi *PexelPhoto) Get(id string) ([]byte, error) {
+func (pi *PexelPhoto) Get(id, size string) ([]byte, error) {
 	urll := BaseURL + "photos/" + id
 	data, err := utils.ParseRequest(urll)
 	if err != nil {
@@ -81,14 +92,10 @@ func (pi *PexelPhoto) Get(id string) ([]byte, error) {
 		return nil, err
 	}
 
-	data2, err := utils.ParseRequest(pi.Source.Original)
-	return data2, nil
-}
-
-// PexelPhoto implementation of Getter that retrieves a random image based on its size.
-func (pi *PexelPhoto) GetBySize(size string) ([]byte, error) {
 	s := parseSize(size)
-	return utils.ParseRequest(s)
+	bySize := pi.GetBySize(s)
+	data2, err := utils.ParseRequest(bySize)
+	return data2, nil
 }
 
 //parseSize obtains the size arg and if it is empty returns the ImageSizeLarge
@@ -104,7 +111,7 @@ func parseSize(size string) string {
 }
 
 //GetRandomImage returns a random image from the Pexel API
-func(pi *PexelPhoto) GetRandomImage() ([]byte, error) {
+func (pi *PexelPhoto) GetRandomImage(size string) ([]byte, error) {
 	randomInt := utils.RandIntBetween(1000)
 	urll := fmt.Sprintf("%s%s?per_page=%d&page=%d", BaseURL, URLCurated, 1, randomInt)
 
@@ -112,6 +119,7 @@ func(pi *PexelPhoto) GetRandomImage() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	s := parseSize(size)
 
 	var pr PexelImageResponse
 	err = json.Unmarshal(data, &pr)
@@ -121,6 +129,31 @@ func(pi *PexelPhoto) GetRandomImage() ([]byte, error) {
 
 	*pi = pr.Photos[0]
 
-	data2, err := utils.ParseRequest(pi.Source.Original)
+	bySize := pi.GetBySize(s)
+
+	data2, err := utils.ParseRequest(bySize)
 	return data2, nil
+}
+
+//GetBySize returns the exact size based url based on the size parameter
+func (pi *PexelPhoto) GetBySize(size string) string {
+	switch size {
+	case ImageSizeLarge2x:
+		return pi.Source.Large2x
+	case ImageSizeLarge:
+		return pi.Source.Large
+	case ImageSizeLandscape:
+		return pi.Source.Landscape
+	case ImageSizeMedium:
+		return pi.Source.Medium
+	case ImageSizeOriginal:
+		return pi.Source.Original
+	case ImageSizeSmall:
+		return pi.Source.Small
+	case ImageSizeTiny:
+		return pi.Source.Tiny
+	default:
+		return pi.Source.Large
+	}
+	return pi.Source.Large
 }
