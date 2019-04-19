@@ -38,8 +38,11 @@ func ChangeUbuntuBackground(filepath string) error {
 	return nil
 }
 
-
+//RandIntBetween gets a number between and including 0 and the max
 func RandIntBetween(max int) int {
+	if max < 2{
+		return 0
+	}
 	return rand.Intn(max-1) + 1
 }
 
