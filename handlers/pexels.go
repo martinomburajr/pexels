@@ -27,7 +27,7 @@ func GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filepath := fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(), pexel.ID)
-	err = utils.WriteImageToFile(filepath, data)
+	err = utils.WriteToFile(filepath, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -61,7 +61,7 @@ func GetRandomHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filepath := fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(), pexel.ID)
-	err = utils.WriteImageToFile(filepath, data)
+	err = utils.WriteToFile(filepath, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
