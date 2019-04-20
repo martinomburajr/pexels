@@ -49,6 +49,7 @@ func main() {
 	r.HandleFunc("/", nil).Methods(http.MethodGet)
 	r.HandleFunc("/new/{id}", handlers.GetPexelHandler).Methods(http.MethodGet)
 	r.HandleFunc("/rand", handlers.GetRandomHandler).Methods(http.MethodGet)
+	r.HandleFunc("/sizes", handlers.GetSizesHandler).Methods(http.MethodGet)
 
 	log.Print(fmt.Sprintf("pexels server started on port %d", port))
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), r))
