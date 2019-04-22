@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/gorilla/mux"
+	"github.com/martinomburajr/pexels/app"
 	"github.com/martinomburajr/pexels/auth"
 	"github.com/martinomburajr/pexels/config"
-	"github.com/martinomburajr/pexels/handlers"
+	"github.com/martinomburajr/pexels/pexels"
+	"github.com/martinomburajr/pexels/utils"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -45,14 +46,15 @@ func init() {
 }
 
 func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/", nil).Methods(http.MethodGet)
-	r.HandleFunc("/new/{id}", handlers.GetPexelHandler).Methods(http.MethodGet)
-	r.HandleFunc("/rand", handlers.GetRandomHandler).Methods(http.MethodGet)
-	r.HandleFunc("/sizes", handlers.GetSizesHandler).Methods(http.MethodGet)
+	p := pexels.PexelPhoto{}
+	u := utils.Utils{}
+	server := &app.Server{
+		PexelsDB: &p,
+		Utilizer: &u,
+	}
 
 	log.Print(fmt.Sprintf("pexels server started on port %d", port))
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), r))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), server.Routes()))
 }
 
 //initialize performs the initialization steps to ensure there is a pexels folder and config file
@@ -101,7 +103,8 @@ func createPexelsFolder() error {
 func createPexelsPictureFolder() error {
 	err := os.MkdirAll(config.CanonicalBasePath()+"/pictures", os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("error creating pictures folder in config.CanonicalBasePath (%s) | %s", config.CanonicalBasePath, err.Error())
+		return fmt.Errorf("error creating pictures folder in config.CanonicalBasePath %s | %s", config.CanonicalBasePath(), err.Error())
 	}
 	return nil
 }
+

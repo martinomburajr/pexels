@@ -1,6 +1,6 @@
 package pexels
 
-//go:generate mockgen --destination=../mocks/mock_getter.go --package mocks github.com/martinomburajr/gopexels/pexels Getter
+//go:generate mockgen --destination=../mocks/mock_pexeler.go --package mocks github.com/martinomburajr/pexels/pexels Pexeler,GetRandomPexeler
 
 import (
 	"encoding/json"
@@ -10,7 +10,6 @@ import (
 )
 
 const (
-	//@todo get exact description of sizes
 	//ImageSizeOriginal represents the original size. Typically the largest with the best quality
 	ImageSizeOriginal  = "original"
 	//ImageSizeLarge is a large photo
@@ -87,8 +86,20 @@ type PexelPhotoSource struct {
 	Tiny      string `json:"tiny,omitempty"`
 }
 
+// Pexeler interface contains valid methods that a Pexels type can utilize
+type Pexeler interface {
+	Get(id, size string) ([]byte, error)
+	GetRandomImage(size string) (int, []byte, error)
+	GetBySize(size string) string
+}
+
+type GetRandomPexeler interface {
+	GetRandomImage(size string) ([]byte, error)
+}
+
 // PexelPhoto implementation of Getter that retrieves an image based on its size.
 func (pi *PexelPhoto) Get(id, size string) ([]byte, error) {
+	utils := utils.Utils{}
 	urll := BaseURL + "photos/" + id
 	data, err := utils.ParseRequest(urll)
 	if err != nil {
@@ -119,20 +130,21 @@ func parseSize(size string) string {
 }
 
 //GetRandomImage returns a random image from the Pexel API
-func (pi *PexelPhoto) GetRandomImage(size string) ([]byte, error) {
-	randomInt := utils.RandIntBetween(1000)
+func (pi *PexelPhoto) GetRandomImage(size string) (int, []byte, error) {
+	utils := utils.Utils{}
+	randomInt := utils.RandInt(1000)
 	urll := fmt.Sprintf("%s%s?per_page=%d&page=%d", BaseURL, URLCurated, 1, randomInt)
 
 	data, err := utils.ParseRequest(urll)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 	s := parseSize(size)
 
 	var pr PexelImageResponse
 	err = json.Unmarshal(data, &pr)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
 	*pi = pr.Photos[0]
@@ -140,10 +152,11 @@ func (pi *PexelPhoto) GetRandomImage(size string) ([]byte, error) {
 	bySize := pi.GetBySize(s)
 
 	data2, err := utils.ParseRequest(bySize)
-	return data2, nil
+	return pi.ID, data2, nil
 }
 
-//GetBySize returns the exact size based url based on the size parameter
+// GetBySize returns the exact size based url based on the size parameter.
+// The appropriate url is returned as a string.
 func (pi *PexelPhoto) GetBySize(size string) string {
 	switch size {
 	case ImageSizeLarge2x:
