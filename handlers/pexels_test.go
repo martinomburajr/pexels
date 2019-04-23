@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"github.com/martinomburajr/pexels/pexels"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
