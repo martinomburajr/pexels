@@ -5,7 +5,6 @@ PKG_LIST := ($shell go list {$PKG}/...)
 .PHONY: build test run
 
 
-
 run: ##builds and runs the program and cleans the build file after
 	@go build -i -v -o pexelss && ./pexelss
 

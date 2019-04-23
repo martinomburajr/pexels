@@ -29,7 +29,7 @@ func init() {
 		log.Print("locating API KEY ...")
 
 		pexelsConfig := config.PexelsConfig{}
-		err := pexelsConfig.Load()
+		err := pexelsConfig.Load("")
 		if err != nil {
 			msg := "you must give in your api-key using the -key flag.\n " +
 				"If you DO NOT have a key, follow the following link to register for one.\n " +
@@ -87,12 +87,12 @@ func createConfig() error {
 		return err
 	}
 
-	return ioutil.WriteFile(config.ConfigPath(), data, 0755)
+	return ioutil.WriteFile(config.ConfigPath(""), data, 0755)
 }
 
 //createPexelsFolder creates the canonical base path for this application. Without it, the application will try and recreate it.
 func createPexelsFolder() error {
-	err := os.MkdirAll(config.CanonicalBasePath(), os.ModePerm)
+	err := os.MkdirAll(config.CanonicalBasePath(""), os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("error creating base directory | %s", err.Error())
 	}
@@ -101,9 +101,9 @@ func createPexelsFolder() error {
 
 //createPexelsPictureFolder creates a picture folder within the canonical base path
 func createPexelsPictureFolder() error {
-	err := os.MkdirAll(config.CanonicalBasePath()+"/pictures", os.ModePerm)
+	err := os.MkdirAll(config.CanonicalBasePath("")+"/pictures", os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("error creating pictures folder in config.CanonicalBasePath %s | %s", config.CanonicalBasePath(), err.Error())
+		return fmt.Errorf("error creating pictures folder in config.CanonicalBasePath %s | %s", config.CanonicalBasePath(""), err.Error())
 	}
 	return nil
 }

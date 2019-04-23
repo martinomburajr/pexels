@@ -101,7 +101,7 @@ type GetRandomPexeler interface {
 func (pi *PexelPhoto) Get(id, size string) ([]byte, error) {
 	utils := utils.Utils{}
 	urll := BaseURL + "photos/" + id
-	data, err := utils.ParseRequest(urll)
+	data, err := utils.ParseRequest(urll, "")
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func (pi *PexelPhoto) Get(id, size string) ([]byte, error) {
 
 	s := parseSize(size)
 	bySize := pi.GetBySize(s)
-	data2, err := utils.ParseRequest(bySize)
+	data2, err := utils.ParseRequest(bySize, "")
 	return data2, nil
 }
 
@@ -135,7 +135,7 @@ func (pi *PexelPhoto) GetRandomImage(size string) (int, []byte, error) {
 	randomInt := utils.RandInt(1000)
 	urll := fmt.Sprintf("%s%s?per_page=%d&page=%d", BaseURL, URLCurated, 1, randomInt)
 
-	data, err := utils.ParseRequest(urll)
+	data, err := utils.ParseRequest(urll, "")
 	if err != nil {
 		return 0, nil, err
 	}
@@ -151,7 +151,7 @@ func (pi *PexelPhoto) GetRandomImage(size string) (int, []byte, error) {
 
 	bySize := pi.GetBySize(s)
 
-	data2, err := utils.ParseRequest(bySize)
+	data2, err := utils.ParseRequest(bySize, "")
 	return pi.ID, data2, nil
 }
 

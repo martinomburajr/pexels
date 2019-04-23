@@ -3,7 +3,6 @@ package utils
 //go:generate mockgen --destination=../mocks/mock_utils.go --package mocks github.com/martinomburajr/pexels/utils BackgroundChanger,Filer,Rander,Utilizer
 
 import (
-	"github.com/martinomburajr/pexels/auth"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -84,13 +83,13 @@ func (w *Utils) RandBytes(size int) []byte {
 }
 
 //ParseRequest parses the request for a picture
-func (w *Utils) ParseRequest(url string) ([]byte, error) {
+func (w *Utils) ParseRequest(url string, API_KEY string) ([]byte, error) {
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	request.Header.Add(http.CanonicalHeaderKey("Authorization"), auth.PexelSession.API_KEY)
+	request.Header.Add(http.CanonicalHeaderKey("Authorization"), API_KEY)
 
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {

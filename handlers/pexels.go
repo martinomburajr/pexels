@@ -30,7 +30,7 @@ func GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filepath := fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(), pexel.ID)
+	filepath := fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), pexel.ID)
 	err = u.WriteToFile(filepath, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

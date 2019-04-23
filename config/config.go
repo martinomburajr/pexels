@@ -9,24 +9,23 @@ import (
 	"runtime"
 )
 
-const ()
 
 //CanonicalBasePath represents the location within the file directory to create the pexels folder.
-func CanonicalBasePath() string {
-	return fmt.Sprintf(getHomeDir() + "/.pexels")
+func CanonicalBasePath(homeDir string) string {
+	return fmt.Sprintf(homeDir + "/.pexels")
 }
 
 //CanonicalBasePath represents the location within the file directory to create the pexels folder.
-func CanonicalPicturePath() string {
-	return fmt.Sprintf(getHomeDir() + "/.pexels/pictures")
+func CanonicalPicturePath(homeDir string) string {
+	return fmt.Sprintf(homeDir + "/.pexels/pictures")
 }
 
-//ConfigPath is the path to the pexels config json file
-func ConfigPath() string {
-	return CanonicalBasePath() + "/pexels.config.json"
+// ConfigPath is the path to the pexels config json file
+func ConfigPath(homeDir string) string {
+	return CanonicalBasePath(homeDir) + "/pexels.config.json"
 }
 
-//getHomeDir obtained from https://stackoverflow.com/a/7922977/7899563
+// getHomeDir obtained from https://stackoverflow.com/a/7922977/7899563
 func getHomeDir() string {
 	if runtime.GOOS == "windows" {
 		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
@@ -44,8 +43,8 @@ type PexelsConfig struct {
 }
 
 //Load obtains the API information from the file
-func (p *PexelsConfig) Load() error {
-	data, err := ioutil.ReadFile(ConfigPath())
+func (p *PexelsConfig) Load(configPath string) error {
+	data, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		return err
 	}
@@ -55,7 +54,7 @@ func (p *PexelsConfig) Load() error {
 		return err
 	}
 
-	if p.APIKEY == "" {
+	if p.APIKEY == "" || len(p.APIKEY) < 6 {
 		return fmt.Errorf("invalid API key, cannot be empty string")
 	}
 

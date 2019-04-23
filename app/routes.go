@@ -41,7 +41,7 @@ func (s *Server) GetRandomHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filepath := fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(), id)
+	filepath := fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), id)
 	err = s.Utilizer.WriteToFile(filepath, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
