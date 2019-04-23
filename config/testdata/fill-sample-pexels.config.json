@@ -1,0 +1,46 @@
+  {
+    "_id": "5cbed082cf885dbfe25d9992",
+    "index": 1,
+    "guid": "5f5d27d7-ea0a-41ca-af01-c9891ea7eb27",
+    "isActive": false,
+    "balance": "$1,986.28",
+    "picture": "http://placehold.it/32x32",
+    "age": 22,
+    "eyeColor": "blue",
+    "name": "Sharp Curtis",
+    "gender": "male",
+    "company": "TELEQUIET",
+    "email": "sharpcurtis@telequiet.com",
+    "phone": "+1 (864) 502-2197",
+    "address": "919 Jamison Lane, Campo, Nebraska, 5402",
+    "about": "Pariatur quis pariatur enim nulla labore non. Id laborum ullamco proident non esse. Qui aute deserunt consequat duis velit do nulla ullamco irure. Labore laboris aliqua amet officia proident voluptate ea laboris. Id id nulla sint nostrud adipisicing id proident esse fugiat amet cupidatat in anim ullamco. Ad cupidatat pariatur sunt ex dolore nisi non sunt ex fugiat id sint in.\r\n",
+    "registered": "2014-12-10T01:42:21 -02:00",
+    "latitude": 79.338571,
+    "longitude": 37.637369,
+    "tags": [
+      "commodo",
+      "id",
+      "veniam",
+      "sunt",
+      "amet",
+      "officia",
+      "in"
+    ],
+    "apikey": "some-value",
+    "friends": [
+      {
+        "id": 0,
+        "name": "Jimenez Dawson"
+      },
+      {
+        "id": 1,
+        "name": "Mitzi Bryant"
+      },
+      {
+        "id": 2,
+        "name": "Freida Larsen"
+      }
+      ],
+    "greeting": "Hello, Sharp Curtis! You have 1 unread messages.",
+    "favoriteFruit": "banana"
+}

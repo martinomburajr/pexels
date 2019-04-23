@@ -10,9 +10,13 @@ import (
 	"net/http"
 )
 
+
+
+
 //GetPexelHandler returns a single photo
 func GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 	pexel := pexels.PexelPhoto{}
+	u := utils.Utils{}
 
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -26,8 +30,8 @@ func GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filepath := fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(), pexel.ID)
-	err = utils.WriteImageToFile(filepath, data)
+	filepath := fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), pexel.ID)
+	err = u.WriteToFile(filepath, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -37,7 +41,7 @@ func GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 			"Directory: %s\n" +
 			"Size: %d bytes", fmt.Sprintf("%d.jpg\n", pexel.ID), filepath, len(data))
 
-	utils.ChangeUbuntuBackground(filepath)
+	err = u.ChangeUbuntuBackground(filepath)
 	if err != nil {
 		log.Print("failed to change ubuntu background")
 	}
@@ -46,39 +50,7 @@ func GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(resp))
 }
 
-func GetRandomHandler(w http.ResponseWriter, r *http.Request) {
-	pexel := pexels.PexelPhoto{}
 
-	imgSize := r.URL.Query().Get("size")
-
-	data, err := pexel.GetRandomImage(imgSize)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if len(data) < 1 {
-		return
-	}
-
-	filepath := fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(), pexel.ID)
-	err = utils.WriteImageToFile(filepath, data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	resp := fmt.Sprintf(
-		"Filename: %s\n" +
-		"Directory: %s\n" +
-		"Size: %d bytes", fmt.Sprintf("%d.jpg\n", pexel.ID), filepath, len(data))
-
-	err = utils.ChangeUbuntuBackground(filepath)
-	if err != nil {
-		log.Print("failed to change ubuntu background")
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(resp))
-}
 
 //GetSizesHandler returns information about all supported sizes
 func GetSizesHandler(w http.ResponseWriter, r *http.Request) {

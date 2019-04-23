@@ -100,7 +100,7 @@ func TestPexelPhoto_GetRandomImage(t *testing.T) {
 				Photographer: tt.fields.Photographer,
 				Source:       tt.fields.Source,
 			}
-			got, err := pi.GetRandomImage(tt.args.size)
+			_, got, err := pi.GetRandomImage(tt.args.size)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PexelPhoto.GetRandomImage() error = %v, wantErr %v", err, tt.wantErr)
 				return

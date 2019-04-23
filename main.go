@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/gorilla/mux"
+	"github.com/martinomburajr/pexels/app"
 	"github.com/martinomburajr/pexels/auth"
 	"github.com/martinomburajr/pexels/config"
-	"github.com/martinomburajr/pexels/handlers"
+	"github.com/martinomburajr/pexels/pexels"
+	"github.com/martinomburajr/pexels/utils"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -28,7 +29,7 @@ func init() {
 		log.Print("locating API KEY ...")
 
 		pexelsConfig := config.PexelsConfig{}
-		err := pexelsConfig.Load()
+		err := pexelsConfig.Load("")
 		if err != nil {
 			msg := "you must give in your api-key using the -key flag.\n " +
 				"If you DO NOT have a key, follow the following link to register for one.\n " +
@@ -45,14 +46,15 @@ func init() {
 }
 
 func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/", nil).Methods(http.MethodGet)
-	r.HandleFunc("/new/{id}", handlers.GetPexelHandler).Methods(http.MethodGet)
-	r.HandleFunc("/rand", handlers.GetRandomHandler).Methods(http.MethodGet)
-	r.HandleFunc("/sizes", handlers.GetSizesHandler).Methods(http.MethodGet)
+	p := pexels.PexelPhoto{}
+	u := utils.Utils{}
+	server := &app.Server{
+		PexelsDB: &p,
+		Utilizer: &u,
+	}
 
 	log.Print(fmt.Sprintf("pexels server started on port %d", port))
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), r))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), server.Routes()))
 }
 
 //initialize performs the initialization steps to ensure there is a pexels folder and config file
@@ -85,12 +87,12 @@ func createConfig() error {
 		return err
 	}
 
-	return ioutil.WriteFile(config.ConfigPath(), data, 0755)
+	return ioutil.WriteFile(config.ConfigPath(""), data, 0755)
 }
 
 //createPexelsFolder creates the canonical base path for this application. Without it, the application will try and recreate it.
 func createPexelsFolder() error {
-	err := os.MkdirAll(config.CanonicalBasePath(), os.ModePerm)
+	err := os.MkdirAll(config.CanonicalBasePath(""), os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("error creating base directory | %s", err.Error())
 	}
@@ -99,9 +101,10 @@ func createPexelsFolder() error {
 
 //createPexelsPictureFolder creates a picture folder within the canonical base path
 func createPexelsPictureFolder() error {
-	err := os.MkdirAll(config.CanonicalBasePath()+"/pictures", os.ModePerm)
+	err := os.MkdirAll(config.CanonicalBasePath("")+"/pictures", os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("error creating pictures folder in config.CanonicalBasePath (%s) | %s", config.CanonicalBasePath, err.Error())
+		return fmt.Errorf("error creating pictures folder in config.CanonicalBasePath %s | %s", config.CanonicalBasePath(""), err.Error())
 	}
 	return nil
 }
+
