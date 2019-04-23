@@ -69,6 +69,9 @@ func (w *Utils) ChangeUbuntuBackground(filepath string) error {
 }
 
 func (w *Utils) RandInt(max int) int {
+	if max < 2{
+		return 0
+	}
 	return rand.Intn(max-1) + 1
 }
 
@@ -103,3 +106,6 @@ func (w *Utils) ParseRequest(url string, API_KEY string) ([]byte, error) {
 	}
 	return data, nil
 }
+
+
+

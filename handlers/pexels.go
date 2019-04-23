@@ -10,10 +10,7 @@ import (
 	"net/http"
 )
 
-
-
-
-//GetPexelHandler returns a single photo
+// GetPexelHandler returns a single photo
 func GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 	pexel := pexels.PexelPhoto{}
 	u := utils.Utils{}
