@@ -30,7 +30,7 @@ func init() {
 		pexelsConfig := config.PexelsConfig{}
 		err := pexelsConfig.Load()
 		if err != nil {
-			msg := "you must give in your api-key using the -key flag.\n " +
+			msg := " You need to give in your api-key using the -key flag.\n " +
 				"If you DO NOT have a key, follow the following link to register for one.\n " +
 				"https://www.pexels.com/api/new/\n " +
 				"You receive a maximum of 20,000 calls per month. That's a good amount of calls ;-)"
