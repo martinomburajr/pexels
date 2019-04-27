@@ -3,16 +3,18 @@ package app
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"math/rand"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/martinomburajr/pexels/config"
 	"github.com/martinomburajr/pexels/mocks"
 	"github.com/martinomburajr/pexels/utils"
-	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 func TestServer_Routes(t *testing.T) {
@@ -76,7 +78,7 @@ func TestServer_GetRandomHandler(t *testing.T) {
 			func() *gomock.Call {
 				return mockUtils.EXPECT().WriteToFile(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), 0), zeroBytes).Return(nil).Times(0)
 			},
-			func() *gomock.Call { return mockUtils.EXPECT().ChangeUbuntuBackground("").Times(0).Return(nil) },
+			func() *gomock.Call { return mockUtils.EXPECT().ChangeBackground("").Times(0).Return(nil) },
 			false},
 		{"error retrieving image", args{request},
 			func() *gomock.Call {
@@ -85,7 +87,7 @@ func TestServer_GetRandomHandler(t *testing.T) {
 			func() *gomock.Call {
 				return mockUtils.EXPECT().WriteToFile(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), 0), zeroBytes).Return(nil).Times(0)
 			},
-			func() *gomock.Call { return mockUtils.EXPECT().ChangeUbuntuBackground("").Times(0).Return(nil) },
+			func() *gomock.Call { return mockUtils.EXPECT().ChangeBackground("").Times(0).Return(nil) },
 			true},
 		{"retrieved an image - file error ", args{request},
 			func() *gomock.Call {
@@ -94,7 +96,7 @@ func TestServer_GetRandomHandler(t *testing.T) {
 			func() *gomock.Call {
 				return mockUtils.EXPECT().WriteToFile(gomock.Eq(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), 0)), randomBytes).Return(errors.New("")).Times(1)
 			},
-			func() *gomock.Call { return mockUtils.EXPECT().ChangeUbuntuBackground("").Return(nil).Times(0) },
+			func() *gomock.Call { return mockUtils.EXPECT().ChangeBackground("").Return(nil).Times(0) },
 			true},
 		{"retrieved an image - no file error - background change error", args{request},
 			func() *gomock.Call {
@@ -104,13 +106,13 @@ func TestServer_GetRandomHandler(t *testing.T) {
 				return mockUtils.EXPECT().WriteToFile(gomock.Eq(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), 1)), randomBytes).Return(nil).Times(1)
 			},
 			func() *gomock.Call {
-				return mockUtils.EXPECT().ChangeUbuntuBackground("").Return(errors.New("")).Times(1)
+				return mockUtils.EXPECT().ChangeBackground("").Return(errors.New("")).Times(1)
 			},
 			true},
 		//{"retrieved an image - no file error - no background change error", args{request},
 		//	func() *gomock.Call { return mockPexeler.EXPECT().GetRandomImage("").Return(u.RandBytes(10000000), nil).Times(1) },
 		//	func() *gomock.Call { return mockUtils.EXPECT().WriteToFile("", "").Return(nil).Times(1) },
-		//	func() *gomock.Call { return mockUtils.EXPECT().ChangeUbuntuBackground("").Times(1).Return(nil) },
+		//	func() *gomock.Call { return mockUtils.EXPECT().ChangeBackground("").Times(1).Return(nil) },
 		//	false},
 	}
 
@@ -167,7 +169,6 @@ func TestServer_GetSizesHandler(t *testing.T) {
 	}
 }
 
-
 func testReadSizesFile(t *testing.T) string {
 	t.Helper()
 	bytes, err := ioutil.ReadFile("testdata/sizes")
@@ -175,4 +176,117 @@ func testReadSizesFile(t *testing.T) string {
 		t.Fail()
 	}
 	return string(bytes)
+}
+
+func TestServer_GetPexelHandler(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+
+	mockUtilizer := mocks.NewMockUtilizer(controller)
+	mockPexeler := mocks.NewMockPexeler(controller)
+	srv := &Server{
+		Utilizer: mockUtilizer,
+		PexelsDB: mockPexeler,
+	}
+
+	smallBytes := testingGenerateBytes(8, t)
+	largeBytes := testingGenerateBytes(13, t)
+
+	type args struct {
+		r *http.Request
+	}
+	tests := []struct {
+		name                 string
+		args                 args
+		pexelerMock          func() *gomock.Call
+		filerMock            func() *gomock.Call
+		changeBackgroundMock func() *gomock.Call
+		fields               *Server
+		wantErr              bool
+	}{
+		// Because we are using a gorilla/mux and registered the /new route with an id. Any path without an id is automatically forfeited.
+		{"error no request id",
+			args{httptest.NewRequest(http.MethodGet, "/new", nil)},
+			func() *gomock.Call { return mockPexeler.EXPECT().Get(0, "").Times(0) },
+			func() *gomock.Call { return mockUtilizer.EXPECT().WriteToFile("", nil).Times(0) },
+			func() *gomock.Call { return mockUtilizer.EXPECT().ChangeBackground("").Times(0) },
+			srv, true},
+			{"request id - invalid characters",
+			args{httptest.NewRequest(http.MethodGet, "/new/gfgd", nil)},
+			func() *gomock.Call { return mockPexeler.EXPECT().Get(0, "").Times(0) },
+			func() *gomock.Call { return mockUtilizer.EXPECT().WriteToFile("", nil).Times(0) },
+			func() *gomock.Call { return mockUtilizer.EXPECT().ChangeBackground("").Times(0) },
+			srv, true},
+			{"request id - valid characters - server get error",
+			args{httptest.NewRequest(http.MethodGet, "/new/0", nil)},
+			func() *gomock.Call { return mockPexeler.EXPECT().Get(0, "").Return(nil, errors.New("error")).Times(1) },
+			func() *gomock.Call { return mockUtilizer.EXPECT().WriteToFile("", nil).Times(0) },
+			func() *gomock.Call { return mockUtilizer.EXPECT().ChangeBackground("").Times(0) },
+			srv, true},
+		{"request id - valid characters - server no error no bytes",
+			args{httptest.NewRequest(http.MethodGet, "/new/0", nil)},
+			func() *gomock.Call { return mockPexeler.EXPECT().Get(0, "").Return(nil, nil).Times(1) },
+			func() *gomock.Call { return mockUtilizer.EXPECT().WriteToFile("", nil).Times(0) },
+			func() *gomock.Call { return mockUtilizer.EXPECT().ChangeBackground("").Times(0) },
+			srv, true},
+			{"request id - valid characters - server no error small bytes",
+			args{httptest.NewRequest(http.MethodGet, "/new/0", nil)},
+			func() *gomock.Call { return mockPexeler.EXPECT().Get(0, "").Return(smallBytes, nil).Times(1) },
+			func() *gomock.Call { return mockUtilizer.EXPECT().WriteToFile("", nil).Times(0) },
+			func() *gomock.Call { return mockUtilizer.EXPECT().ChangeBackground("").Times(0) },
+			srv, true},
+		{"request id - valid characters - server get ok bytes - err write-file ",
+			args{httptest.NewRequest(http.MethodGet, "/new/0", nil)},
+			func() *gomock.Call { return mockPexeler.EXPECT().Get(0, "").Return(largeBytes, nil).Times(1) },
+			func() *gomock.Call { return mockUtilizer.EXPECT().WriteToFile(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(config.GetHomeDir()), 0), largeBytes).Return(errors.New("error")).Times(1)},
+			func() *gomock.Call { return mockUtilizer.EXPECT().ChangeBackground("").Times(0) },
+			srv, true},
+		{"request id - valid characters - server get ok bytes - write-file - err change background ",
+			args{httptest.NewRequest(http.MethodGet, "/new/0", nil)},
+			func() *gomock.Call { return mockPexeler.EXPECT().Get(0, "").Return(largeBytes, nil).Times(1) },
+			func() *gomock.Call { return mockUtilizer.EXPECT().WriteToFile(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(config.GetHomeDir()), 0), largeBytes).Return(nil).Times(1)},
+			func() *gomock.Call { return mockUtilizer.EXPECT().ChangeBackground(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(config.GetHomeDir()), 0)).Return(nil, errors.New("error")).Times(1) },
+			srv, true},
+		{"request id - valid characters - server get ok bytes - write-file -  change background ",
+			args{httptest.NewRequest(http.MethodGet, "/new/0", nil)},
+			func() *gomock.Call { return mockPexeler.EXPECT().Get(0, "").Return(largeBytes, nil).Times(1) },
+			func() *gomock.Call { return mockUtilizer.EXPECT().WriteToFile(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(config.GetHomeDir()), 0), largeBytes).Return(nil).Times(1)},
+			func() *gomock.Call { return mockUtilizer.EXPECT().ChangeBackground(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(config.GetHomeDir()), 0)).Return([]byte("ok"), nil).Times(1) },
+			srv, false},
+
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.pexelerMock()
+			tt.filerMock()
+			tt.changeBackgroundMock()
+
+			s := &Server{
+				PexelsDB: tt.fields.PexelsDB,
+				Router:   tt.fields.Router,
+				Utilizer: tt.fields.Utilizer,
+			}
+
+			w := httptest.NewRecorder()
+			s.Routes().ServeHTTP(w, tt.args.r)
+			//http.HandlerFunc(s.GetPexelHandler).ServeHTTP(w, tt.args.r)
+
+			if tt.wantErr {
+				if w.Code < 400 {
+					t.Fatalf(" wanted an error  want: <400 | got %d", w.Code)
+				}
+			} else {
+				if status := w.Code; status != http.StatusOK {
+					t.Fatalf("status not OK - got %d", status)
+				}
+			}
+		})
+	}
+}
+
+func testingGenerateBytes(size int, t *testing.T) []byte{
+	t.Helper()
+	arr := make([]byte, size)
+	rand.Read(arr)
+	return arr
 }

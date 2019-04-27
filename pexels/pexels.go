@@ -35,17 +35,6 @@ const (
 //ImageSizes represents a set of image sizes that pexels uses
 var ImageSizes = []string{ImageSizeOriginal, ImageSizeLarge, ImageSizeLarge2x, ImageSizeMedium, ImageSizeSmall, ImageSizePortrait, ImageSizeLandscape, ImageSizeTiny}
 
-// Getter belongs to any types that must retrieve an item based on an id.
-type Getter interface {
-	// Given an id or resource locator, Get implements the functionality of retrieving an item id doesnt necessarily need to be a standardized id e.g. for a database record,
-	// It can be any string value that identifies an item as unique.
-	// Returns an error and nil bytes if there is an error. A nil error and a non-nil bytes array could represent an error returned in the form of bytes or a successful retrieval
-	Get(id string) ([]byte, error)
-
-	//GetR will retrieve a random element
-	GetR() ([]byte, error)
-}
-
 //PexelImageRespoonse represents a response from the server regarding an image request
 type PexelImageResponse struct {
 	Page         int          `json:"page,omitempty"`
@@ -88,7 +77,7 @@ type PexelPhotoSource struct {
 
 // Pexeler interface contains valid methods that a Pexels type can utilize
 type Pexeler interface {
-	Get(id, size string) ([]byte, error)
+	Get(id int, size string) ([]byte, error)
 	GetRandomImage(size string) (int, []byte, error)
 	GetBySize(size string) string
 }
@@ -98,9 +87,9 @@ type GetRandomPexeler interface {
 }
 
 // PexelPhoto implementation of Getter that retrieves an image based on its size.
-func (pi *PexelPhoto) Get(id, size string) ([]byte, error) {
+func (pi *PexelPhoto) Get(id int, size string) ([]byte, error) {
 	utils := utils.Utils{}
-	urll := BaseURL + "photos/" + id
+	urll := fmt.Sprintf("%s%s/%d", BaseURL, "photos/", id)
 	data, err := utils.ParseRequest(urll, "")
 	if err != nil {
 		return nil, err

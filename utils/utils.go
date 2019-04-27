@@ -27,8 +27,8 @@ type Filer interface {
 
 // BackgroundChanger is involved in calling the OS to perform writes
 type BackgroundChanger interface {
-	// ChangeUbuntuBackground performs desktop background change. This method can be reimplemented to suite changes in OS behaviors. error handling is left to the implementor
-	ChangeUbuntuBackground(filepath string) ([]byte, error)
+	// ChangeBackground performs desktop background change. This method can be reimplemented to suite changes in OS behaviors. error handling is left to the implementor
+	ChangeBackground(filepath string) ([]byte, error)
 }
 
 // Rander contains functions that perform the creation of random data
@@ -55,8 +55,8 @@ func (w *Utils) WriteToFile(filepath string, data []byte) error {
 
 var execCommand = exec.Command
 
-// ChangeUbuntuBackground automatically changes the background on Ubuntu. Must be the full filepath
-func (w *Utils) ChangeUbuntuBackground(filepath string) ([]byte, error) {
+// ChangeBackground automatically changes the background on Ubuntu. Must be the full filepath
+func (w *Utils) ChangeBackground(filepath string) ([]byte, error) {
 	//gsettings set org.gnome.desktop.background picture-uri file:///path/to/your/image.png from https://askubuntu.com/a/156722
 
 	file, err := os.Open(filepath)
