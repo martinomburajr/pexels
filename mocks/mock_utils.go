@@ -32,19 +32,19 @@ func (m *MockBackgroundChanger) EXPECT() *MockBackgroundChangerMockRecorder {
 	return m.recorder
 }
 
-// ChangeUbuntuBackground mocks base method
-func (m *MockBackgroundChanger) ChangeUbuntuBackground(arg0 string) ([]byte, error) {
+// ChangeBackground mocks base method
+func (m *MockBackgroundChanger) ChangeBackground(arg0 string) ([]byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ChangeUbuntuBackground", arg0)
+	ret := m.ctrl.Call(m, "ChangeBackground", arg0)
 	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ChangeUbuntuBackground indicates an expected call of ChangeUbuntuBackground
-func (mr *MockBackgroundChangerMockRecorder) ChangeUbuntuBackground(arg0 interface{}) *gomock.Call {
+// ChangeBackground indicates an expected call of ChangeBackground
+func (mr *MockBackgroundChangerMockRecorder) ChangeBackground(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUbuntuBackground", reflect.TypeOf((*MockBackgroundChanger)(nil).ChangeUbuntuBackground), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeBackground", reflect.TypeOf((*MockBackgroundChanger)(nil).ChangeBackground), arg0)
 }
 
 // MockFiler is a mock of Filer interface
@@ -158,19 +158,19 @@ func (m *MockUtilizer) EXPECT() *MockUtilizerMockRecorder {
 	return m.recorder
 }
 
-// ChangeUbuntuBackground mocks base method
-func (m *MockUtilizer) ChangeUbuntuBackground(arg0 string) ([]byte, error) {
+// ChangeBackground mocks base method
+func (m *MockUtilizer) ChangeBackground(arg0 string) ([]byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ChangeUbuntuBackground", arg0)
+	ret := m.ctrl.Call(m, "ChangeBackground", arg0)
 	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ChangeUbuntuBackground indicates an expected call of ChangeUbuntuBackground
-func (mr *MockUtilizerMockRecorder) ChangeUbuntuBackground(arg0 interface{}) *gomock.Call {
+// ChangeBackground indicates an expected call of ChangeBackground
+func (mr *MockUtilizerMockRecorder) ChangeBackground(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUbuntuBackground", reflect.TypeOf((*MockUtilizer)(nil).ChangeUbuntuBackground), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeBackground", reflect.TypeOf((*MockUtilizer)(nil).ChangeBackground), arg0)
 }
 
 // RandBytes mocks base method

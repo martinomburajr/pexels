@@ -180,7 +180,7 @@ func testUtilsChangeBackground(t *testing.T, filepath string, wantErr bool) {
 	u := Utils{}
 	execCommand = fakeExecCommand
 	defer func() { execCommand = exec.Command }()
-	out, err := u.ChangeUbuntuBackground(filepath)
+	out, err := u.ChangeBackground(filepath)
 	if wantErr {
 		if err != nil {
 

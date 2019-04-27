@@ -33,7 +33,7 @@ func (m *MockPexeler) EXPECT() *MockPexelerMockRecorder {
 }
 
 // Get mocks base method
-func (m *MockPexeler) Get(arg0, arg1 string) ([]byte, error) {
+func (m *MockPexeler) Get(arg0 int, arg1 string) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0, arg1)
 	ret0, _ := ret[0].([]byte)
