@@ -16,6 +16,9 @@ type Server struct {
 	Utilizer utils.Utilizer
 }
 
+// MinImageBytes states minimum size the response from retrieving an image can be. Responses smaller than this will not be accepted.
+const MinImageBytes = 1024
+
 // routes returns a gorilla/mux Router which is a valid Router/Handler that can be served. Refactoring this into a function makes it testable.
 func (s *Server) Routes() *mux.Router {
 	s.Router.Methods(http.MethodGet).Path("/").HandlerFunc(s.HealthCheckHandler)
@@ -53,9 +56,8 @@ func (s *Server) GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "pexels server returned small bytes", http.StatusInternalServerError)
 		return
 	}
-	// the value of 10 is arbitrary. An accurate small enough value should be determined.
-	// @todo find size of smallest possible valid response for an image.
-	if len(data) < 10  {
+
+	if len(data) < MinImageBytes  {
 		http.Error(w, "pexels server returned small bytes", http.StatusInternalServerError)
 		return
 	}
