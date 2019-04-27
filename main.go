@@ -26,12 +26,14 @@ func init() {
 	flag.Parse()
 
 	if ap == "" {
-		log.Print("locating API KEY ...")
+		log.Print("Locating API KEY ...")
 
+		dir := config.GetHomeDir()
 		pexelsConfig := config.PexelsConfig{}
-		err := pexelsConfig.Load("")
+
+		err := pexelsConfig.Load(config.ConfigPath(dir))
 		if err != nil {
-			msg := "you must give in your api-key using the -key flag.\n " +
+			msg := "You need to supply your api-key using the -key flag.\n " +
 				"If you DO NOT have a key, follow the following link to register for one.\n " +
 				"https://www.pexels.com/api/new/\n " +
 				"You receive a maximum of 20,000 calls per month. That's a good amount of calls ;-)"

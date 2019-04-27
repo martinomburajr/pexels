@@ -167,6 +167,7 @@ func TestServer_GetSizesHandler(t *testing.T) {
 	}
 }
 
+
 func testReadSizesFile(t *testing.T) string {
 	t.Helper()
 	bytes, err := ioutil.ReadFile("testdata/sizes")
