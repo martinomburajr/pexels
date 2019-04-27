@@ -53,6 +53,7 @@ func (s *Server) GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if data == nil {
+		//@todo change return message in router/GetPexelHandler to no bytes
 		http.Error(w, "pexels server returned small bytes", http.StatusInternalServerError)
 		return
 	}
@@ -87,15 +88,19 @@ func (s *Server) GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 
 // GetRandomHandler will download a random image from the curated list in pexels.
 func (s *Server) GetRandomHandler(w http.ResponseWriter, r *http.Request) {
-	//pexel := pexels.PexelPhoto{}
 	imgSize := r.URL.Query().Get("size")
 
 	id, data, err := s.PexelsDB.GetRandomImage(imgSize)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(),http.StatusInternalServerError)
 		return
 	}
-	if len(data) < 1 {
+	if data == nil {
+		http.Error(w, "pexels server returned no bytes", http.StatusInternalServerError)
+		return
+	}
+	if len(data) < MinImageBytes  {
+		http.Error(w, "pexels server returned small bytes", http.StatusInternalServerError)
 		return
 	}
 
@@ -114,7 +119,7 @@ func (s *Server) GetRandomHandler(w http.ResponseWriter, r *http.Request) {
 
 	data, err = s.Utilizer.ChangeBackground(filepath)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "failed to change background " + err.Error(), http.StatusInternalServerError)
 		return
 	}
 
