@@ -11,25 +11,25 @@ import (
 
 const (
 	//ImageSizeOriginal represents the original size. Typically the largest with the best quality
-	ImageSizeOriginal  = "original"
+	ImageSizeOriginal = "original"
 	//ImageSizeLarge is a large photo
-	ImageSizeLarge     = "large"
+	ImageSizeLarge = "large"
 	//ImageSizeLarge2x double the resolution of the largest
-	ImageSizeLarge2x   = "large2x"
+	ImageSizeLarge2x = "large2x"
 	//ImageSizeMedium medium photo
-	ImageSizeMedium    = "medium"
+	ImageSizeMedium = "medium"
 	//ImageSizeSmall small photo (lacks in resolution)
-	ImageSizeSmall     = "small"
+	ImageSizeSmall = "small"
 	//ImageSizePortrait portrait mode. This image is usually cropped to fit that size
-	ImageSizePortrait  = "portrait"
+	ImageSizePortrait = "portrait"
 	//ImageSizeLandscape landscape sized photo
 	ImageSizeLandscape = "landscape"
 	//ImageSizeLandscape tiny photo
-	ImageSizeTiny      = "tiny"
+	ImageSizeTiny = "tiny"
 	//BaseURL is the base URL to the API
-	BaseURL            = "https://api.pexels.com/v1/"
+	BaseURL = "https://api.pexels.com/v1/"
 	//URLCurated is a path to the curated section within pexels. According to pexels ... We add at least one new photo per hour to our curated list so that you get a changing selection of trending photos. For more information about the request parameters and response structure have a look at the search method above.
-	URLCurated         = "curated"
+	URLCurated = "curated"
 )
 
 //ImageSizes represents a set of image sizes that pexels uses
@@ -69,21 +69,21 @@ type PexelPhoto struct {
 //PexelPhotoSource represents a photo source embedded within the PexelPhoto
 type PexelPhotoSource struct {
 	// Original - The size of the original image is given with the attributes width and height.
-	Original  string `json:"original,omitempty"`
+	Original string `json:"original,omitempty"`
 	// Large - This image has a maximum width of 940px and a maximum height of 650px. It has the aspect ratio of the original image.
-	Large     string `json:"large,omitempty"`
+	Large string `json:"large,omitempty"`
 	// Large2x - This image has a maximum width of 1880px and a maximum height of 1300px. It has the aspect ratio of the original image.
-	Large2x   string `json:"large2x,omitempty"`
+	Large2x string `json:"large2x,omitempty"`
 	//Medium - This image has a height of 350px and a flexible width. It has the aspect ratio of the original image.
-	Medium    string `json:"medium,omitempty"`
+	Medium string `json:"medium,omitempty"`
 	//Small - This image has a height of 130px and a flexible width. It has the aspect ratio of the original image.
-	Small     string `json:"small,omitempty"`
+	Small string `json:"small,omitempty"`
 	//Portrait - This image has a width of 800px and a height of 1200px.
-	Portrait  string `json:"portrait,omitempty"`
+	Portrait string `json:"portrait,omitempty"`
 	//Landscape -	This image has a width of 1200px and height of 627px.
 	Landscape string `json:"landscape,omitempty"`
 	//Tiny - This image has a width of 280px and height of 200px.
-	Tiny      string `json:"tiny,omitempty"`
+	Tiny string `json:"tiny,omitempty"`
 }
 
 // Pexeler interface contains valid methods that a Pexels type can utilize

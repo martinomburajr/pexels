@@ -14,32 +14,7 @@ import (
 //	mux.Methods(http.Get(""))
 //}
 
-func testReadSizesFile(t *testing.T) string {
-	t.Helper()
-	bytes, err := ioutil.ReadFile("testdata/sizes")
-	if err != nil {
-		t.Fail()
-	}
-	return string(bytes)
-}
 
-func TestGetSizesHandler(t *testing.T) {
-	sizes := testReadSizesFile(t)
-
-	w := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodGet, "/sizes", nil)
-
-	handler := http.HandlerFunc(GetSizesHandler)
-	handler.ServeHTTP(w, r)
-
-	if status := w.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
-	}
-	if w.Body.String() != sizes {
-		t.Errorf("handler body is not identical to file\n\nbody:\n%s\nfile:\n%s", w.Body.String(), sizes)
-	}
-}
 
 func TestGetRandomHandler(t *testing.T) {
 	request, err := http.NewRequest(http.MethodGet, "/rand", nil)
@@ -90,14 +65,14 @@ func TestGetRandomHandler(t *testing.T) {
 
 func TestHealthCheckHandler(t *testing.T) {
 	type args struct {
-		r *http.Request
+		r        *http.Request
 		bodyWant string
 	}
 	tests := []struct {
 		name string
 		args args
 	}{
-		{ "simple request", args{r: httptest.NewRequest(http.MethodGet, "/hc", nil), bodyWant: `{"status":"ok"}`}},
+		{"simple request", args{r: httptest.NewRequest(http.MethodGet, "/hc", nil), bodyWant: `{"status":"ok"}`}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

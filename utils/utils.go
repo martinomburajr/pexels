@@ -3,12 +3,15 @@ package utils
 //go:generate mockgen --destination=../mocks/mock_utils.go --package mocks github.com/martinomburajr/pexels/utils BackgroundChanger,Filer,Rander,Utilizer
 
 import (
+	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 )
+
 // Utilizer embodies all the different interfaces
 type Utilizer interface {
 	Filer
@@ -25,7 +28,7 @@ type Filer interface {
 // BackgroundChanger is involved in calling the OS to perform writes
 type BackgroundChanger interface {
 	// ChangeUbuntuBackground performs desktop background change. This method can be reimplemented to suite changes in OS behaviors. error handling is left to the implementor
-	ChangeUbuntuBackground(filepath string) error
+	ChangeUbuntuBackground(filepath string) ([]byte, error)
 }
 
 // Rander contains functions that perform the creation of random data
@@ -37,7 +40,7 @@ type Rander interface {
 }
 
 // Utils acts as a container type for the methods within this file
-type Utils struct {}
+type Utils struct{}
 
 //WriteToFile requires the full path to file as well as file extension e.g. ~./pexels/pictures/snow.jpg, as well as a byte array for the data
 func (w *Utils) WriteToFile(filepath string, data []byte) error {
@@ -47,29 +50,38 @@ func (w *Utils) WriteToFile(filepath string, data []byte) error {
 	}
 
 	defer file.Close()
-	err = ioutil.WriteFile(filepath, data, 0755)
-	if err != nil {
-		return err
-	}
-	return nil
+	return ioutil.WriteFile(filepath, data, 0755)
 }
 
-//ChangeUbuntuBackground works on Ubuntu. Must be the full filepath
-func (w *Utils) ChangeUbuntuBackground(filepath string) error {
+var execCommand = exec.Command
+
+// ChangeUbuntuBackground automatically changes the background on Ubuntu. Must be the full filepath
+func (w *Utils) ChangeUbuntuBackground(filepath string) ([]byte, error) {
 	//gsettings set org.gnome.desktop.background picture-uri file:///path/to/your/image.png from https://askubuntu.com/a/156722
-	cmd := exec.Command("gsettings", "set", "org.gnome.desktop.background", "picture-uri", filepath)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
+
+	file, err := os.Open(filepath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	hasSuffix := false
+	for _, v := range supportedimageformats {
+		if strings.HasSuffix(strings.ToLower(file.Name()), strings.ToLower(v)) {
+			hasSuffix = true
+			break
+		}
+	}
+	if !hasSuffix {
+		return nil, fmt.Errorf("not a supported image format. Pexels supports the following: %v", supportedimageformats)
+	}
+
+	cmd := execCommand("gsettings", "set", "org.gnome.desktop.background", "picture-uri", file.Name())
+	return []byte("ok"), cmd.Run()
 }
 
+// RandInt returns a number between [0, max)
 func (w *Utils) RandInt(max int) int {
-	if max < 2{
+	if max < 2 {
 		return 0
 	}
 	return rand.Intn(max-1) + 1
@@ -100,12 +112,8 @@ func (w *Utils) ParseRequest(url string, API_KEY string) ([]byte, error) {
 	}
 
 	defer response.Body.Close()
-	data, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
+	return ioutil.ReadAll(response.Body)
 }
 
-
-
+//common image formats that are allowed to be set by this applications. Contributors may need to add more.
+var supportedimageformats = []string{".jpg", ".png", ".jpeg", ".bmp", ".gif"}

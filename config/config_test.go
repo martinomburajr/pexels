@@ -11,7 +11,7 @@ func TestCanonicalBasePath(t *testing.T) {
 		args args
 		want string
 	}{
-		{"home directory",args{"/home/me"}, "/home/me/.pexels"},
+		{"home directory", args{"/home/me"}, "/home/me/.pexels"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -31,7 +31,7 @@ func TestCanonicalPicturePath(t *testing.T) {
 		args args
 		want string
 	}{
-		{"home directory",args{"/home/me"}, "/home/me/.pexels/pictures"},
+		{"home directory", args{"/home/me"}, "/home/me/.pexels/pictures"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -51,7 +51,7 @@ func TestConfigPath(t *testing.T) {
 		args args
 		want string
 	}{
-		{"home directory",args{"/home/me"}, "/home/me/.pexels/pexels.config.json"},
+		{"home directory", args{"/home/me"}, "/home/me/.pexels/pexels.config.json"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -62,21 +62,6 @@ func TestConfigPath(t *testing.T) {
 	}
 }
 
-func Test_getHomeDir(t *testing.T) {
-	tests := []struct {
-		name string
-		want string
-	}{
-		{"", "home/me"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := getHomeDir(); got != tt.want {
-				t.Errorf("getHomeDir() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
 
 func TestPexelsConfig_Load(t *testing.T) {
 	type fields struct {
@@ -91,14 +76,14 @@ func TestPexelsConfig_Load(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"load-api-key - error folder not file", fields{"some-value"},  args{"./testdata"}, true },
-		{"load-api-key - readfile ok - jsonunmarshal error", fields{"some-value"},  args{"./testdata/bad-sample-pexels.config.json"}, true },
-		{"load-api-key - readfile ok - jsonunmarshal error", fields{"some-value"},  args{"./testdata/bad-file"}, true },
-		{"load-api-key - readfile ok - unmarshall ok - apikey in between other keys", fields{"some-value"},  args{"./testdata/fill-sample-pexels.config.json"}, false },
-		{"load-api-key - readfile ok - unmarshall ok - duplicate keys - should select last key", fields{"some-value_2"},  args{"./testdata/multiple-keys-pexels.config.json"}, false },
-		{"load-api-key - readfile ok - unmarshall ok - empty keys ", fields{""},  args{"./testdata/empty-key-pexels.config.json"}, true },
-		{"load-api-key - readfile ok - unmarshall ok - key size is small", fields{"small"},  args{"./testdata/smallkey-pexels.config.json"}, true },
-		{"load-api-key - readfile ok - unmarshall ok", fields{"some-value"},  args{"./testdata/sample-pexels.config.json"}, false },
+		{"load-api-key - error folder not file", fields{"some-value"}, args{"./testdata"}, true},
+		{"load-api-key - readfile ok - jsonunmarshal error", fields{"some-value"}, args{"./testdata/bad-sample-pexels.config.json"}, true},
+		{"load-api-key - readfile ok - jsonunmarshal error", fields{"some-value"}, args{"./testdata/bad-file"}, true},
+		{"load-api-key - readfile ok - unmarshall ok - apikey in between other keys", fields{"some-value"}, args{"./testdata/fill-sample-pexels.config.json"}, false},
+		{"load-api-key - readfile ok - unmarshall ok - duplicate keys - should select last key", fields{"some-value_2"}, args{"./testdata/multiple-keys-pexels.config.json"}, false},
+		{"load-api-key - readfile ok - unmarshall ok - empty keys ", fields{""}, args{"./testdata/empty-key-pexels.config.json"}, true},
+		{"load-api-key - readfile ok - unmarshall ok - key size is small", fields{"small"}, args{"./testdata/smallkey-pexels.config.json"}, true},
+		{"load-api-key - readfile ok - unmarshall ok", fields{"some-value"}, args{"./testdata/sample-pexels.config.json"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

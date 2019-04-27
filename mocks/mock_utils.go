@@ -33,11 +33,12 @@ func (m *MockBackgroundChanger) EXPECT() *MockBackgroundChangerMockRecorder {
 }
 
 // ChangeUbuntuBackground mocks base method
-func (m *MockBackgroundChanger) ChangeUbuntuBackground(arg0 string) error {
+func (m *MockBackgroundChanger) ChangeUbuntuBackground(arg0 string) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ChangeUbuntuBackground", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // ChangeUbuntuBackground indicates an expected call of ChangeUbuntuBackground
@@ -158,11 +159,12 @@ func (m *MockUtilizer) EXPECT() *MockUtilizerMockRecorder {
 }
 
 // ChangeUbuntuBackground mocks base method
-func (m *MockUtilizer) ChangeUbuntuBackground(arg0 string) error {
+func (m *MockUtilizer) ChangeUbuntuBackground(arg0 string) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ChangeUbuntuBackground", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // ChangeUbuntuBackground indicates an expected call of ChangeUbuntuBackground

@@ -107,4 +107,3 @@ func createPexelsPictureFolder() error {
 	}
 	return nil
 }
-

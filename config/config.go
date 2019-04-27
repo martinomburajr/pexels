@@ -9,7 +9,6 @@ import (
 	"runtime"
 )
 
-
 //CanonicalBasePath represents the location within the file directory to create the pexels folder.
 func CanonicalBasePath(homeDir string) string {
 	return fmt.Sprintf(homeDir + "/.pexels")
@@ -25,8 +24,9 @@ func ConfigPath(homeDir string) string {
 	return CanonicalBasePath(homeDir) + "/pexels.config.json"
 }
 
-// getHomeDir obtained from https://stackoverflow.com/a/7922977/7899563
-func getHomeDir() string {
+// GetHomeDir obtained from https://stackoverflow.com/a/7922977/7899563
+// @todo test GetHomeDir function in config.go
+func GetHomeDir() string {
 	if runtime.GOOS == "windows" {
 		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
 		if home == "" {
@@ -36,6 +36,7 @@ func getHomeDir() string {
 	}
 	return os.Getenv("HOME")
 }
+
 
 //PexelsConfig represents the configuration objects such as the APIKEY from within the config file in the ConfigPath.
 type PexelsConfig struct {

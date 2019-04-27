@@ -12,7 +12,7 @@ import (
 
 type Server struct {
 	PexelsDB pexels.Pexeler
-	Router mux.Router
+	Router   mux.Router
 	Utilizer utils.Utilizer
 }
 
@@ -22,7 +22,7 @@ func (s *Server) Routes() *mux.Router {
 	s.Router.Methods(http.MethodGet).Path("/hc").HandlerFunc(s.HealthCheckHandler)
 	s.Router.Methods(http.MethodGet).Path("/new/{id}").HandlerFunc(handlers.GetPexelHandler)
 	s.Router.Methods(http.MethodGet).Path("/rand").HandlerFunc(s.GetRandomHandler)
-	s.Router.Methods(http.MethodGet).Path("/sizes").HandlerFunc(handlers.GetSizesHandler)
+	s.Router.Methods(http.MethodGet).Path("/sizes").HandlerFunc(s.GetSizesHandler)
 
 	return &s.Router
 }
@@ -41,7 +41,8 @@ func (s *Server) GetRandomHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filepath := fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), id)
+	homeDir := config.GetHomeDir()
+	filepath := fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(homeDir), id)
 	err = s.Utilizer.WriteToFile(filepath, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -53,9 +54,9 @@ func (s *Server) GetRandomHandler(w http.ResponseWriter, r *http.Request) {
 			"Directory: %s\n"+
 			"Size: %d bytes", fmt.Sprintf("%d.jpg\n", id), filepath, len(data))
 
-	err = s.Utilizer.ChangeUbuntuBackground(filepath)
+	data, err = s.Utilizer.ChangeUbuntuBackground(filepath)
 	if err != nil {
-		http.Error(w, err.Error() , http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -67,4 +68,19 @@ func (s *Server) GetRandomHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status":"ok"}`))
+}
+
+//GetSizesHandler returns information about all supported sizes
+func (s *Server) GetSizesHandler(w http.ResponseWriter, r *http.Request) {
+	response := fmt.Sprint("\nOriginal - The size of the original image is given with the attributes width and height.\n" +
+		"Large - This image has a maximum width of 940px and a maximum height of 650px. It has the aspect ratio of the original image.\n" +
+		"Large2x - This image has a maximum width of 1880px and a maximum height of 1300px. It has the aspect ratio of the original image.\n" +
+		"Medium - This image has a height of 350px and a flexible width. It has the aspect ratio of the original image.\n" +
+		"Small - This image has a height of 130px and a flexible width. It has the aspect ratio of the original image.\n" +
+		"Portrait - This image has a width of 800px and a height of 1200px.\n" +
+		"Landscape - This image has a width of 1200px and height of 627px.\n" +
+		"Tiny - This image has a width of 280px and height of 200px.\n")
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(response))
 }

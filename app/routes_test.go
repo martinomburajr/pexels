@@ -8,8 +8,10 @@ import (
 	"github.com/martinomburajr/pexels/config"
 	"github.com/martinomburajr/pexels/mocks"
 	"github.com/martinomburajr/pexels/utils"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -71,23 +73,39 @@ func TestServer_GetRandomHandler(t *testing.T) {
 	}{
 		{"zero values", args{request},
 			func() *gomock.Call { return mockPexeler.EXPECT().GetRandomImage("").Return(0, zeroBytes, nil).Times(1) },
-			func() *gomock.Call { return mockUtils.EXPECT().WriteToFile(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), 0), zeroBytes).Return(nil).Times(0) },
+			func() *gomock.Call {
+				return mockUtils.EXPECT().WriteToFile(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), 0), zeroBytes).Return(nil).Times(0)
+			},
 			func() *gomock.Call { return mockUtils.EXPECT().ChangeUbuntuBackground("").Times(0).Return(nil) },
 			false},
 		{"error retrieving image", args{request},
-			func() *gomock.Call { return mockPexeler.EXPECT().GetRandomImage("").Return(0, zeroBytes, errors.New("error")).Times(1) },
-			func() *gomock.Call { return mockUtils.EXPECT().WriteToFile(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), 0), zeroBytes).Return(nil).Times(0) },
+			func() *gomock.Call {
+				return mockPexeler.EXPECT().GetRandomImage("").Return(0, zeroBytes, errors.New("error")).Times(1)
+			},
+			func() *gomock.Call {
+				return mockUtils.EXPECT().WriteToFile(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), 0), zeroBytes).Return(nil).Times(0)
+			},
 			func() *gomock.Call { return mockUtils.EXPECT().ChangeUbuntuBackground("").Times(0).Return(nil) },
 			true},
 		{"retrieved an image - file error ", args{request},
-			func() *gomock.Call { return mockPexeler.EXPECT().GetRandomImage("").Return(0, randomBytes, nil).Times(1) },
-			func() *gomock.Call { return mockUtils.EXPECT().WriteToFile(gomock.Eq(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), 0)), randomBytes).Return(errors.New("")).Times(1) },
+			func() *gomock.Call {
+				return mockPexeler.EXPECT().GetRandomImage("").Return(0, randomBytes, nil).Times(1)
+			},
+			func() *gomock.Call {
+				return mockUtils.EXPECT().WriteToFile(gomock.Eq(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), 0)), randomBytes).Return(errors.New("")).Times(1)
+			},
 			func() *gomock.Call { return mockUtils.EXPECT().ChangeUbuntuBackground("").Return(nil).Times(0) },
 			true},
 		{"retrieved an image - no file error - background change error", args{request},
-			func() *gomock.Call { return mockPexeler.EXPECT().GetRandomImage("").Return(1, randomBytes, nil).Times(1) },
-			func() *gomock.Call { return mockUtils.EXPECT().WriteToFile(gomock.Eq(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), 1)), randomBytes).Return(nil).Times(1) },
-			func() *gomock.Call { return mockUtils.EXPECT().ChangeUbuntuBackground("").Return(errors.New("")).Times(1) },
+			func() *gomock.Call {
+				return mockPexeler.EXPECT().GetRandomImage("").Return(1, randomBytes, nil).Times(1)
+			},
+			func() *gomock.Call {
+				return mockUtils.EXPECT().WriteToFile(gomock.Eq(fmt.Sprintf("%s/%d.jpg", config.CanonicalPicturePath(""), 1)), randomBytes).Return(nil).Times(1)
+			},
+			func() *gomock.Call {
+				return mockUtils.EXPECT().ChangeUbuntuBackground("").Return(errors.New("")).Times(1)
+			},
 			true},
 		//{"retrieved an image - no file error - no background change error", args{request},
 		//	func() *gomock.Call { return mockPexeler.EXPECT().GetRandomImage("").Return(u.RandBytes(10000000), nil).Times(1) },
@@ -125,4 +143,35 @@ func TestServer_GetRandomHandler(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestServer_GetSizesHandler(t *testing.T) {
+	sizes := testReadSizesFile(t)
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "/sizes", nil)
+
+	srv := Server{}
+	srv.Routes()
+
+	handler := http.HandlerFunc(srv.GetSizesHandler)
+	handler.ServeHTTP(w, r)
+
+	if status := w.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	if strings.Contains(string(w.Body.String()), sizes) {
+		t.Errorf("handler body is not identical to file\n\nbody:\n%s\nfile:\n%s", w.Body.String(), sizes)
+	}
+}
+
+func testReadSizesFile(t *testing.T) string {
+	t.Helper()
+	bytes, err := ioutil.ReadFile("testdata/sizes")
+	if err != nil {
+		t.Fail()
+	}
+	return string(bytes)
 }
