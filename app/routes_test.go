@@ -189,8 +189,10 @@ func TestServer_GetPexelHandler(t *testing.T) {
 		PexelsDB: mockPexeler,
 	}
 
+	minPhotoSize := 1024
+
 	smallBytes := testingGenerateBytes(8, t)
-	largeBytes := testingGenerateBytes(13, t)
+	largeBytes := testingGenerateBytes(minPhotoSize + 1, t)
 
 	type args struct {
 		r *http.Request
@@ -269,7 +271,6 @@ func TestServer_GetPexelHandler(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			s.Routes().ServeHTTP(w, tt.args.r)
-			//http.HandlerFunc(s.GetPexelHandler).ServeHTTP(w, tt.args.r)
 
 			if tt.wantErr {
 				if w.Code < 400 {
