@@ -53,8 +53,7 @@ func (s *Server) GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if data == nil {
-		//@todo change return message in router/GetPexelHandler to no bytes
-		http.Error(w, "pexels server returned small bytes", http.StatusInternalServerError)
+		http.Error(w, "pexels server returned no bytes", http.StatusInternalServerError)
 		return
 	}
 
