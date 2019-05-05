@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/martinomburajr/pexels/auth"
 	"github.com/martinomburajr/pexels/config"
 	"github.com/martinomburajr/pexels/pexels"
 	"github.com/martinomburajr/pexels/utils"
@@ -10,28 +11,35 @@ import (
 	"strconv"
 )
 
-type Server struct {
+type PrimeServer struct {
 	PexelsDB pexels.Pexeler
-	Router   mux.Router
+	Router   *mux.Router
 	Utilizer utils.Utilizer
+	HTTPDefaultClient *http.Client
+	Session *auth.PexelSessionObj
+}
+
+func init() {
+
 }
 
 // MinImageBytes states minimum size the response from retrieving an image can be. Responses smaller than this will not be accepted.
 const MinImageBytes = 1024
 
 // routes returns a gorilla/mux Router which is a valid Router/Handler that can be served. Refactoring this into a function makes it testable.
-func (s *Server) Routes() *mux.Router {
+func (s *PrimeServer) Routes() *mux.Router {
 	s.Router.Methods(http.MethodGet).Path("/").HandlerFunc(s.HealthCheckHandler)
 	s.Router.Methods(http.MethodGet).Path("/hc").HandlerFunc(s.HealthCheckHandler)
 	s.Router.Methods(http.MethodGet).Path("/new/{id}").HandlerFunc(s.GetPexelHandler)
 	s.Router.Methods(http.MethodGet).Path("/rand").HandlerFunc(s.GetRandomHandler)
 	s.Router.Methods(http.MethodGet).Path("/sizes").HandlerFunc(s.GetSizesHandler)
 
-	return &s.Router
+	return s.Router
 }
 
 // GetPexelHandler returns a single photo based on an id.
-func (s *Server) GetPexelHandler(w http.ResponseWriter, r *http.Request) {
+func (s *PrimeServer) GetPexelHandler(w http.ResponseWriter, r *http.Request) {
+	//@todo check server session validity for routes/GetPexelHandler
 	vars := mux.Vars(r)
 	idString := vars["id"]
 
@@ -45,7 +53,7 @@ func (s *Server) GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	imgSize := r.URL.Query().Get("size")
-	data, err := s.PexelsDB.Get(int(id), imgSize)
+	data, err := s.PexelsDB.Get(s.HTTPDefaultClient, s.Session, int(id), imgSize)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -86,7 +94,8 @@ func (s *Server) GetPexelHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetRandomHandler will download a random image from the curated list in pexels.
-func (s *Server) GetRandomHandler(w http.ResponseWriter, r *http.Request) {
+func (s *PrimeServer) GetRandomHandler(w http.ResponseWriter, r *http.Request) {
+	//@todo check server session validity for routes/GetRandomHandler
 	imgSize := r.URL.Query().Get("size")
 
 	id, data, err := s.PexelsDB.GetRandomImage(imgSize)
@@ -127,13 +136,15 @@ func (s *Server) GetRandomHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // HealthCheckHandler is a simple test to see that the router and server are able to pick up incoming requests and handle them appropriately.
-func (s *Server) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+func (s *PrimeServer) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	//@todo check server session validity for routes/HealthCheckHandler
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status":"ok"}`))
 }
 
 //GetSizesHandler returns information about all supported sizes
-func (s *Server) GetSizesHandler(w http.ResponseWriter, r *http.Request) {
+func (s *PrimeServer) GetSizesHandler(w http.ResponseWriter, r *http.Request) {
+	//@todo check server session validity for routes/GetSizesHandler
 	response := fmt.Sprint("\nOriginal - The size of the original image is given with the attributes width and height.\n" +
 		"Large - This image has a maximum width of 940px and a maximum height of 650px. It has the aspect ratio of the original image.\n" +
 		"Large2x - This image has a maximum width of 1880px and a maximum height of 1300px. It has the aspect ratio of the original image.\n" +

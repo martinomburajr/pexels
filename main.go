@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 var port int
@@ -50,9 +51,17 @@ func init() {
 func main() {
 	p := pexels.PexelPhoto{}
 	u := utils.Utils{}
-	server := &app.Server{
+
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+		Transport: nil,
+	}
+
+	server := &app.PrimeServer{
 		PexelsDB: &p,
 		Utilizer: &u,
+		HTTPDefaultClient: client,
+		Session: auth.PexelSession,
 	}
 
 	log.Print(fmt.Sprintf("pexels server started on port %d", port))
