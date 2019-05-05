@@ -4,8 +4,12 @@ package pexels
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/martinomburajr/pexels/auth"
 	"github.com/martinomburajr/pexels/utils"
+	"io/ioutil"
+	"net/http"
 	"strings"
 )
 
@@ -32,10 +36,10 @@ const (
 	URLCurated = "curated"
 )
 
-//ImageSizes represents a set of image sizes that pexels uses
+// ImageSizes represents a set of image sizes that pexels uses
 var ImageSizes = []string{ImageSizeOriginal, ImageSizeLarge, ImageSizeLarge2x, ImageSizeMedium, ImageSizeSmall, ImageSizePortrait, ImageSizeLandscape, ImageSizeTiny}
 
-//PexelImageRespoonse represents a response from the server regarding an image request
+// PexelImageRespoonse represents a response from the server regarding an image request
 type PexelImageResponse struct {
 	Page         int          `json:"page,omitempty"`
 	PerPage      int          `json:"per_page,omitempty"`
@@ -45,7 +49,7 @@ type PexelImageResponse struct {
 	Photos       []PexelPhoto `json:"photos"`
 }
 
-//PexelPhoto represents the information of photo
+// PexelPhoto represents the information of photo
 type PexelPhoto struct {
 	ID           int              `json:"id,omitempty"`
 	Width        int              `json:"width,omitempty"`
@@ -55,7 +59,7 @@ type PexelPhoto struct {
 	Source       PexelPhotoSource `json:"src,omitempty"`
 }
 
-//PexelPhotoSource represents a photo source embedded within the PexelPhoto
+// PexelPhotoSource represents a photo source embedded within the PexelPhoto
 type PexelPhotoSource struct {
 	// Original - The size of the original image is given with the attributes width and height.
 	Original string `json:"original,omitempty"`
@@ -77,7 +81,7 @@ type PexelPhotoSource struct {
 
 // Pexeler interface contains valid methods that a Pexels type can utilize
 type Pexeler interface {
-	Get(id int, size string) ([]byte, error)
+	Get(client *http.Client, session *auth.PexelSessionObj, id int, size string) ([]byte, error)
 	GetRandomImage(size string) (int, []byte, error)
 	GetBySize(size string) string
 }
@@ -87,12 +91,27 @@ type GetRandomPexeler interface {
 }
 
 // PexelPhoto implementation of Getter that retrieves an image based on its size.
-func (pi *PexelPhoto) Get(id int, size string) ([]byte, error) {
-	utils := utils.Utils{}
-	urll := fmt.Sprintf("%s%s/%d", BaseURL, "photos/", id)
-	data, err := utils.ParseRequest(urll, "")
+func (pi *PexelPhoto) Get(client *http.Client, session *auth.PexelSessionObj, id int, size string) ([]byte, error) {
+	urll := fmt.Sprintf("%s%s/%d", BaseURL, "photos", id)
+	req, err := http.NewRequest(http.MethodGet, urll, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	req.Header.Set(http.CanonicalHeaderKey("Authorization"), session.API_KEY)
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(data) < 1 {
+		return nil, fmt.Errorf("malformed response from pexels server")
 	}
 
 	err = json.Unmarshal(data, pi)
@@ -102,11 +121,32 @@ func (pi *PexelPhoto) Get(id int, size string) ([]byte, error) {
 
 	s := parseSize(size)
 	bySize := pi.GetBySize(s)
-	data2, err := utils.ParseRequest(bySize, "")
-	return data2, nil
+
+	return GetImage(client, session, bySize)
 }
 
-//parseSize obtains the size arg and if it is empty returns the ImageSizeLarge
+// GetImage fetches the actual image. The difference between GetImage and Get is that GetImage actually fetches the image, where as Get returns the PexelPhoto body that has a URL link to the image.
+func GetImage(client *http.Client, session *auth.PexelSessionObj, imageURL string) ([]byte, error) {
+	if client == nil {
+		return nil, errors.New("nil client")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, imageURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set(http.CanonicalHeaderKey("Authorization"), session.API_KEY)
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	return ioutil.ReadAll(resp.Body)
+}
+
+// parseSize obtains the size arg and if it is empty returns the ImageSizeLarge
 func parseSize(size string) string {
 	lower := strings.ToLower(size)
 	for _, v := range ImageSizes {
@@ -118,7 +158,7 @@ func parseSize(size string) string {
 	return size
 }
 
-//GetRandomImage returns a random image from the Pexel API
+// GetRandomImage returns a random image from the Pexel API
 func (pi *PexelPhoto) GetRandomImage(size string) (int, []byte, error) {
 	utils := utils.Utils{}
 	randomInt := utils.RandInt(1000)

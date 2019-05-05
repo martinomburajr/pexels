@@ -77,6 +77,21 @@ func (mr *MockPexelerMockRecorder) GetRandomImage(arg0 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRandomImage", reflect.TypeOf((*MockPexeler)(nil).GetRandomImage), arg0)
 }
 
+// GetRequest mocks base method
+func (m *MockPexeler) GetRequest(arg0, arg1 string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRequest", arg0, arg1)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRequest indicates an expected call of GetRequest
+func (mr *MockPexelerMockRecorder) GetRequest(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRequest", reflect.TypeOf((*MockPexeler)(nil).GetRequest), arg0, arg1)
+}
+
 // MockGetRandomPexeler is a mock of GetRandomPexeler interface
 type MockGetRandomPexeler struct {
 	ctrl     *gomock.Controller

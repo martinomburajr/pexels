@@ -32,7 +32,7 @@ func TestServer_Routes(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
 
-			s := Server{}
+			s := PrimeServer{}
 			s.Router = *s.Routes()
 			s.Router.ServeHTTP(w, tt.req)
 
@@ -116,7 +116,7 @@ func TestServer_GetRandomHandler(t *testing.T) {
 			tt.filerMock()
 			tt.backgroundMock()
 
-			s := &Server{
+			s := &PrimeServer{
 				Router:   mux.Router{},
 				PexelsDB: mockPexeler,
 				Utilizer: mockUtilizer,
@@ -145,7 +145,7 @@ func TestServer_GetSizesHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/sizes", nil)
 
-	srv := Server{}
+	srv := PrimeServer{}
 	srv.Routes()
 
 	handler := http.HandlerFunc(srv.GetSizesHandler)
@@ -176,7 +176,7 @@ func TestServer_GetPexelHandler(t *testing.T) {
 
 	mockUtilizer := mocks.NewMockUtilizer(controller)
 	mockPexeler := mocks.NewMockPexeler(controller)
-	srv := &Server{
+	srv := &PrimeServer{
 		Utilizer: mockUtilizer,
 		PexelsDB: mockPexeler,
 	}
@@ -195,7 +195,7 @@ func TestServer_GetPexelHandler(t *testing.T) {
 		pexelerMock          func() *gomock.Call
 		filerMock            func() *gomock.Call
 		changeBackgroundMock func() *gomock.Call
-		fields               *Server
+		fields               *PrimeServer
 		wantErr              bool
 	}{
 		// Because we are using a gorilla/mux and registered the /new route with an id. Any path without an id is automatically forfeited.
@@ -254,7 +254,7 @@ func TestServer_GetPexelHandler(t *testing.T) {
 			tt.filerMock()
 			tt.changeBackgroundMock()
 
-			s := &Server{
+			s := &PrimeServer{
 				PexelsDB: tt.fields.PexelsDB,
 				Router:   tt.fields.Router,
 				Utilizer: tt.fields.Utilizer,

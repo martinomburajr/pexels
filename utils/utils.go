@@ -1,6 +1,6 @@
 package utils
 
-//go:generate mockgen --destination=../mocks/mock_utils.go --package mocks github.com/martinomburajr/pexels/utils BackgroundChanger,Filer,Rander,Utilizer
+//go:generate mockgen --destination=../mocks/mock_utils.go --package mocks github.com/martinomburajr/pexels/utils BackgroundChanger,Filer,Rander,Utilizer,HTTPRequester
 
 import (
 	"fmt"
@@ -17,6 +17,7 @@ type Utilizer interface {
 	Filer
 	BackgroundChanger
 	Rander
+	HTTPRequester
 }
 
 // Filer is responsible for behaviour that performs I/O to files
@@ -29,6 +30,10 @@ type Filer interface {
 type BackgroundChanger interface {
 	// ChangeBackground performs desktop background change. This method can be reimplemented to suite changes in OS behaviors. error handling is left to the implementor
 	ChangeBackground(filepath string) ([]byte, error)
+}
+
+type HTTPRequester interface {
+	ParseRequest(url string, API_KEY string) ([]byte, error)
 }
 
 // Rander contains functions that perform the creation of random data
